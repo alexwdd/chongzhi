@@ -1,31 +1,82 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div class="app-container">
+        <div class="routerBox">
+            <transition :name="transitionName">
+                <keep-alive>
+                    <router-view/>
+                </keep-alive>
+            </transition>
+        </div>        
     </div>
-    <router-view/>
-  </div>
 </template>
+<script>
+export default {
+    name: "app",
+    data() {
+        return {
+            user: [],
+            activeIndex: "/",
+            transitionName: ""
+        };
+    },
+    watch: {
+        //使用watch 监听$router的变化
+        $route(to, from) {
+            //如果to的索引值为0，不添加任何动画；如果to索引大于from索引,判断为前进状态,反之则为后退状态
+            if (to.meta.index > 0) {
+                if (to.meta.index < from.meta.index) {
+                    this.transitionName = "slide-right";
+                } else {
+                    this.transitionName = "slide-left";
+                }
+            } else if (to.meta.index == 0 && from.meta.index > 0) {
+                this.transitionName = "slide-right";
+            }
+        }
+    },
+    created() {},
+    mounted() {},
+    methods: {
+        signout() {
+            this.$store.commit("SIGN_OUT");
+            this.$router.push({ path: "/login" });
+        }
+    }
+};
+</script>
 
 <style>
+body,html {width: 100%;height: 100%;}
+li{list-style: none;}
+img{max-width: 100%;}
+* {margin: 0;padding: 0;font-family:"Microsoft YaHei","微软雅黑","Microsoft JhengHei"}
+a{color: #666}
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+    display: flex;
+    height: 100%;
+    flex: 1;
+    flex-direction: column;
 }
-#nav {
-  padding: 30px;
+.slide-right-enter-active,
+.slide-right-leave-active,
+.slide-left-enter-active,
+.slide-left-leave-active {
+    will-change: transform;
+    transition: all 0.3s;
+    position: absolute;
+    width: 100%;
+    left: 0;
 }
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.slide-right-enter {
+    transform: translateX(-100%);
 }
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.slide-right-leave-active {
+    transform: translateX(100%);
+}
+.slide-left-enter {
+    transform: translateX(100%);
+}
+.slide-left-leave-active {
+    transform: translateX(-100%);
 }
 </style>
