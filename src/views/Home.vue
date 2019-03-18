@@ -10,41 +10,79 @@
 			<li @click="handleType(vo)" v-for="vo in type" :key="vo.id"><img :src="vo.aimg" v-if="vo.active"><img :src="vo.img" v-else=""></li>
 		</div>
 
-		<div class="empty" v-show="empty">~~暂无商品~~</div>
-
-		<div class="card" v-for="vo in card" :key="vo.id">
-			<div class="img"><img :src="vo.picname"></div>
-			<div class="info">
-				<div class="name">{{vo.name}}</div>
-				<div class="money">面值 {{vo.money}}</div>
-			</div>
-			<div class="action">
-				<p>￥{{vo.price}}</p>
-				<van-button size="small" plain type="danger" @click="doChongzhi(vo)">马上充值</van-button>
-			</div>
+		<div class="mobile">
+			<span>+65</span>
+			<p>
+			<van-field type="number" v-model="mobile" placeholder="手机号码" clearable style="font-size:20px;"/>
+			</p>
 		</div>
+
+		<van-tabs v-model="active">
+			<van-tab title="充话费">
+				<div class="card" v-for="vo in huafei" :key="vo.id">
+					<div class="img"><img :src="vo.picname"></div>
+					<div class="actionBox">
+						<div class="action" @click="doChongzhi(vo)">
+							<p>${{vo.price}}</p>
+							马上充值
+						</div>
+					</div>
+				</div>
+				<div class="empty" v-show="empty1">~~暂无商品~~</div>
+			</van-tab>
+			<van-tab title="充流量">
+				<div class="card" v-for="vo in liuliang" :key="vo.id">
+					<div class="img"><img :src="vo.picname"></div>
+					<div class="actionBox">
+						<div class="action" @click="doChongzhi(vo)">
+							<p>${{vo.price}}</p>
+							马上充值
+						</div>
+					</div>
+				</div>
+				<div class="empty" v-show="empty2">~~暂无商品~~</div>
+			</van-tab>
+			<van-tab title="充套餐">
+				<div class="card" v-for="vo in taocan" :key="vo.id">
+					<div class="img"><img :src="vo.picname"></div>
+					<div class="actionBox">
+						<div class="action" @click="doChongzhi(vo)">
+							<p>${{vo.price}}</p>
+							马上充值
+						</div>
+					</div>
+				</div>
+				<div class="empty" v-show="empty3">~~暂无商品~~</div>
+			</van-tab>
+		</van-tabs>
+
 		</van-pull-refresh>
 
 		<van-popup v-model="payShow" position="bottom">
-			<div class="mobile">
-				<span>+65</span>
-				<p>
-				<van-field type="number" v-model="mobile" placeholder="手机号码" clearable style="font-size:20px;"/>
-				</p>
+			<div class="payMoney">
+				<p>支付</p>
+				<span>${{goods.price}}</span>
 			</div>
-            <van-radio-group v-model="payType" @change="getPayType">
-				<div class="payType">
-					<li>
-					<van-radio name="1" checked-color="#07c160">支付宝</van-radio>
-					</li>
-					<li>
-					<van-radio name="2" checked-color="#07c160">微信钱包</van-radio>
-					</li>
-				</div>
-			</van-radio-group>
+			<div class="payInfo">{{goods.typeName}}直充${{goods.money}} - {{this.mobile}}</div>
 
+			<div class="payType">
+				<div class="hd">支付方式</div>
+				<li @click="getPayType(1)">
+					<img src="../assets/image/alipay.jpg">
+					<p>支付宝支付</p>
+					<i class="active" v-if="payType==1"></i>
+					<i v-else=""></i>
+				</li>
+				<li @click="getPayType(2)">
+					<img src="../assets/image/weixin.jpg">
+					<p>微信支付</p>
+					<i class="active" v-if="payType==2"></i>
+					<i v-else=""></i>
+				</li>
+			</div>
+			<div class="rmb"><span>支付</span> RMB {{goods.rmb}}</div>
             <div style="padding: 10px;">
-                <van-button class="pay-btn" size="large" @click="doPay">去支付</van-button>
+                <van-button class="my-btn" size="large" @click="doPay">去支付</van-button>
             </div>
         </van-popup>
 
@@ -56,14 +94,19 @@
 export default {
     data() {
         return {
-			empty:false,
+			active:0,
+			empty1:false,
+			empty2:false,
+			empty3:false,
 			ad:[],
 			isLoading: false,
 			type:[],
 			mobile:'',
 			payShow:false,
 			payType:'',
-			card:'',
+			huafei:'',
+			liuliang:'',
+			taocan:'',
 			goods:''
         };
 	},
@@ -73,11 +116,25 @@ export default {
 		    	this.init();
 		    }
 		},
-		card(newValue,oldValue){
+		huafei(newValue,oldValue){
 			if(newValue.length==0){
-				this.empty = true;
+				this.empty1 = true;
 			}else{
-				this.empty = false;
+				this.empty1 = false;
+			}
+		},
+		liuliang(newValue,oldValue){
+			if(newValue.length==0){
+				this.empty2 = true;
+			}else{
+				this.empty2 = false;
+			}
+		},
+		taocan(newValue,oldValue){
+			if(newValue.length==0){
+				this.empty3 = true;
+			}else{
+				this.empty3 = false;
 			}
 		}
     },
@@ -98,7 +155,9 @@ export default {
                 if (res.code == 1) {              
 					that.type = res.body.type; 	
 					that.ad = res.body.ad; 	
-					this.card = this.type[0]['goods'];
+					this.huafei = this.type[0]['huafei'];
+					this.liuliang = this.type[0]['liuliang'];
+					this.taocan = this.type[0]['taocan'];
                 }else{
                     that.$dialog.alert({title:'错误信息',message:res.desc});
                 }
@@ -108,13 +167,23 @@ export default {
 			for(var i in this.type){
 				if(this.type[i]['id'] == value['id']){
 					this.type[i]['active'] = true;
-					this.card = this.type[i]['goods'];
+					this.huafei = this.type[i]['huafei'];
+					this.liuliang = this.type[i]['liuliang'];
+					this.taocan = this.type[i]['taocan'];
 				}else{
 					this.type[i]['active'] = false;
 				}
 			}
 		},
 		doChongzhi(value){
+			if (this.mobile == "") {
+                this.$toast({message:'请输入手机号码',position:'bottom'});
+                return false;
+            }
+            if(!this.config.checkMobile(this.mobile)){
+				this.$toast({message:'手机号码格式错误',position:'bottom'});
+                return false;
+			}
 			this.payShow = true;
 			this.goods = value;
 		},
@@ -158,24 +227,33 @@ export default {
 </script>
 
 <style scoped>
-.banner{}
 .type{clear: both; overflow: hidden;}
 .type li{float: left; width: 33.333%; padding: 10px; box-sizing: border-box}
 
 .my-btn{color: #fff;background-color: #1989fa;border: 1px solid #1989fa; border-radius: 25px}
 .pay-btn{color: #fff;background-color: #07c160;border: 1px solid #07c160; border-radius: 25px}
+
+.payMoney{text-align: center; padding: 10px 0;}
+.payMoney p{font-size: 12px; color: #999}
+.payMoney span{ font-size: 30px; padding: 20px 0; display: block}
+.payInfo{ padding: 10px; font-size:18px}
 .payType{padding: 20px;}
-.payType li{padding: 10px 0; border-bottom: 1px #f1f1f1 solid}
+.payType .hd{border-bottom: 1px #f1f1f1 solid; line-height: 36px;}
+.payType li{padding: 10px 0; border-bottom: 1px #f1f1f1 solid; clear: both; overflow: hidden;}
+.payType li img{ display: block; float: left; width:24px; margin-right: 10px}
+.payType li p{line-height: 24px; float: left;}
+.payType li i{display: block; float: right; height:13px; width:13px;border-radius:7px; border:1px #dbdbdb solid; margin-top: 3px}
+.payType li i.active{background-color: #07c160; border-color: #07c160}
+.rmb{padding: 10px;}
+.rmb span{color: #999}
 
 .card{clear: both; padding: 10px; border-bottom: 1px #dbdbdb dotted; display: flex}
-.card .img{width: 120px; margin-right: 10px;}
+.card .img{flex: 1; margin-right: 10px}
 .card .img img{width: 100%}
-.card .info{flex: 1; margin-right: 10px}
-.card .info .name{font-size: 14px}
-.card .info .money{color: #f00}
-.card .action{width: 80px;}
+.card .actionBox{width: 80px;}
+.card .action{border: 1px #de2741 solid; text-align: center;color:#de2741; font-size: 14px; border-radius:5px; padding: 5px 0}
 
-.mobile{border-bottom:1px #dbdbdb solid; clear: both; overflow: hidden; display: flex; margin:20px;}
+.mobile{border-bottom:1px #dbdbdb solid; clear: both; overflow: hidden; display: flex; margin:20px; margin-top: 0}
 .mobile span{display: block; line-height: 44px; font-size: 20px; color: #999; width: 60px; text-align: center}
 .mobile p{flex: 1; margin: 0}
 .empty{text-align: center;color: #999; padding: 20px 0}
