@@ -1,7 +1,5 @@
 <template>
 	<div class="wrap">
-		<van-pull-refresh v-model="isLoading" @refresh="init">
-
 		<van-swipe :autoplay="3000" indicator-color="white">
 			<van-swipe-item v-for="vo in ad" :key="vo.name"><div class="banner"><img :src="vo.image"/></div></van-swipe-item>
 		</van-swipe>
@@ -12,10 +10,18 @@
 
 		<div class="mobile">
 			<span>+65</span>
-			<p>
-			<van-field type="number" v-model="mobile" placeholder="手机号码" clearable style="font-size:20px;"/>
-			</p>
+			<p @click="showKeyboard">{{mobile}}</p>
 		</div>
+
+		<van-number-keyboard
+			:show="showKey"
+			theme="custom"
+			extra-key="."
+			close-button-text="完成"
+			@blur="showKey = false"
+			@input="onInput"
+			@delete="onDelete"
+		/>
 
 		<van-tabs v-model="active">
 			<van-tab title="充话费">
@@ -56,8 +62,6 @@
 			</van-tab>
 		</van-tabs>
 
-		</van-pull-refresh>
-
 		<van-popup v-model="payShow" position="bottom">
 			<div class="payMoney">
 				<p>支付</p>
@@ -84,9 +88,7 @@
             <div style="padding: 10px;">
                 <van-button class="my-btn" size="large" @click="doPay">去支付</van-button>
             </div>
-        </van-popup>
-
-		
+        </van-popup>	
 	</div>
 </template>
 
@@ -94,14 +96,14 @@
 export default {
     data() {
         return {
+			showKey:false,
 			active:0,
 			empty1:false,
 			empty2:false,
 			empty3:false,
 			ad:[],
-			isLoading: false,
 			type:[],
-			mobile:'',
+			mobile:'请输入手机号码',
 			payShow:false,
 			payType:'',
 			huafei:'',
@@ -163,6 +165,24 @@ export default {
                 }
             });
 		},
+		showKeyboard(){
+			this.showKey = true;
+		},
+		onInput(value) {
+			if(this.mobile=='请输入手机号码'){
+				this.mobile = value.toString();
+			}else{
+				this.mobile += value.toString();
+			}
+		},
+		onDelete() {
+			if(this.mobile!='请输入手机号码'){
+				this.mobile = this.mobile.substr(0,this.mobile.length - 1);
+				if(this.mobile==''){
+					this.mobile = '请输入手机号码';
+				}
+			}
+		},
 		handleType(value){
 			for(var i in this.type){
 				if(this.type[i]['id'] == value['id']){
@@ -204,29 +224,16 @@ export default {
                 return false;
 			}
 			window.sessionStorage.setItem('mobile', this.mobile);
-
-			this.$toast.loading({mask: true,duration:0});
-			let data = {
-				payType:this.payType,
-				goodsID:this.goods.id,
-				mobile:this.mobile,
-			}
-            this.$http.post("/chongzhi/submit",data).then(result => {
-                this.$toast.clear();
-                let res = result.data;
-                if (res.code == 1) {
-                    this.$dialog.alert({title:'提示',message:'订单号：'+res.body.order_no});
-					this.payShow = false;
-                }else{
-                    this.$dialog.alert({title:'错误信息',message:res.desc});
-                }
-            });
+			this.payShow = false;
+			let url = "app://Recharge?mobile="+this.mobile+"&payType="+this.payType+"&goodsID="+this.goods.id;
+			window.location.href = url;
 		}
     }
 };
 </script>
 
 <style scoped>
+.wrap{min-height: 100vh}
 .type{clear: both; overflow: hidden;}
 .type li{float: left; width: 33.333%; padding: 10px; box-sizing: border-box}
 
@@ -234,7 +241,7 @@ export default {
 .pay-btn{color: #fff;background-color: #07c160;border: 1px solid #07c160; border-radius: 25px}
 
 .payMoney{text-align: center; padding: 10px 0;}
-.payMoney p{font-size: 12px; color: #999}
+.payMoney p{color: #999}
 .payMoney span{ font-size: 30px; padding: 20px 0; display: block}
 .payInfo{ padding: 10px; font-size:18px}
 .payType{padding: 20px;}
@@ -254,7 +261,7 @@ export default {
 .card .action{border: 1px #de2741 solid; text-align: center;color:#de2741; font-size: 14px; border-radius:5px; padding: 5px 0}
 
 .mobile{border-bottom:1px #dbdbdb solid; clear: both; overflow: hidden; display: flex; margin:20px; margin-top: 0}
-.mobile span{display: block; line-height: 44px; font-size: 20px; color: #999; width: 60px; text-align: center}
-.mobile p{flex: 1; margin: 0}
-.empty{text-align: center;color: #999; padding: 20px 0}
+.mobile span{display: block; line-height:50px; font-size: 20px; color: #999; width: 60px; text-align: center;}
+.mobile p{flex: 1; margin: 0;line-height:50px; font-size: 20px;}
+.empty{text-align: center;color: #999; padding: 30px 0;}
 </style>
