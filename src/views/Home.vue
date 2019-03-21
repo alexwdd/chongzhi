@@ -1,7 +1,7 @@
 <template>
 	<div class="wrap">
 		<van-swipe :autoplay="3000" indicator-color="white">
-			<van-swipe-item v-for="vo in ad" :key="vo.name"><div class="banner"><img :src="vo.image"/></div></van-swipe-item>
+			<van-swipe-item v-for="vo in ad" :key="vo.name"><div class="banner"><a :href="vo.url"><img :src="vo.image"/></a></div></van-swipe-item>
 		</van-swipe>
 
 		<div class="type">
@@ -10,7 +10,8 @@
 
 		<div class="mobile">
 			<span>+65</span>
-			<p @click="showKeyboard">{{mobile}}</p>
+			<p @click="showKeyboard" v-if="mobile=='请输入手机号码'" class="gray">{{mobile}}</p>
+			<p @click="showKeyboard" v-else="">{{mobile}}</p>
 		</div>
 
 		<van-number-keyboard
@@ -26,8 +27,8 @@
 		<van-tabs v-model="active">
 			<van-tab title="充话费">
 				<div class="card" v-for="vo in huafei" :key="vo.id">
-					<div class="img"><img :src="vo.picname"></div>
-					<div class="actionBox">
+					<div class="img">
+						<img :src="vo.picname">
 						<div class="action" @click="doChongzhi(vo)">
 							<p>${{vo.price}}</p>
 							马上充值
@@ -38,8 +39,8 @@
 			</van-tab>
 			<van-tab title="充流量">
 				<div class="card" v-for="vo in liuliang" :key="vo.id">
-					<div class="img"><img :src="vo.picname"></div>
-					<div class="actionBox">
+					<div class="img">
+						<img :src="vo.picname">
 						<div class="action" @click="doChongzhi(vo)">
 							<p>${{vo.price}}</p>
 							马上充值
@@ -50,13 +51,13 @@
 			</van-tab>
 			<van-tab title="充套餐">
 				<div class="card" v-for="vo in taocan" :key="vo.id">
-					<div class="img"><img :src="vo.picname"></div>
-					<div class="actionBox">
+					<div class="img">
+						<img :src="vo.picname">
 						<div class="action" @click="doChongzhi(vo)">
 							<p>${{vo.price}}</p>
 							马上充值
 						</div>
-					</div>
+					</div>	
 				</div>
 				<div class="empty" v-show="empty3">~~暂无商品~~</div>
 			</van-tab>
@@ -64,7 +65,6 @@
 
 		<van-popup v-model="payShow" position="bottom">
 			<div class="payMoney">
-				<p>支付</p>
 				<span>${{goods.price}}</span>
 			</div>
 			<div class="payInfo">{{goods.typeName}}直充${{goods.money}} - {{this.mobile}}</div>
@@ -84,7 +84,7 @@
 					<i v-else=""></i>
 				</li>
 			</div>
-			<div class="rmb"><span>支付</span> RMB {{goods.rmb}}</div>
+			<div class="rmb"><span>即将支付</span> {{goods.rmb}} RMB</div>
             <div style="padding: 10px;">
                 <van-button class="my-btn" size="large" @click="doPay">去支付</van-button>
             </div>
@@ -255,13 +255,13 @@ export default {
 .rmb span{color: #999}
 
 .card{clear: both; padding: 10px; border-bottom: 1px #dbdbdb dotted; display: flex}
-.card .img{flex: 1; margin-right: 10px}
+.card .img{flex: 1; position: relative;}
 .card .img img{width: 100%}
-.card .actionBox{width: 80px;}
-.card .action{border: 1px #de2741 solid; text-align: center;color:#de2741; font-size: 14px; border-radius:5px; padding: 5px 0}
+.card .img .action{border: 1px #de2741 solid; text-align: center;color:#de2741; font-size: 12px; border-radius:5px; padding: 2px 0; margin-top: 5px; position: absolute; width: 60px; right: 0px; top: 0px;}
 
 .mobile{border-bottom:1px #dbdbdb solid; clear: both; overflow: hidden; display: flex; margin:20px; margin-top: 0}
-.mobile span{display: block; line-height:50px; font-size: 20px; color: #999; width: 60px; text-align: center;}
+.mobile span{display: block; line-height:50px; font-size: 20px; width: 60px; text-align: center;}
 .mobile p{flex: 1; margin: 0;line-height:50px; font-size: 20px;}
+.gray{color: #999}
 .empty{text-align: center;color: #999; padding: 30px 0;}
 </style>
