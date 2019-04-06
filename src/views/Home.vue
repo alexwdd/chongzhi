@@ -89,6 +89,8 @@
                 <van-button class="my-btn" size="large" @click="doPay">去支付</van-button>
             </div>
         </van-popup>	
+
+		<van-loading v-show="isLoading" style="margin:auto"/>
 	</div>
 </template>
 
@@ -96,6 +98,7 @@
 export default {
     data() {
         return {
+			isLoading:true,
 			showKey:false,
 			active:0,
 			empty1:false,
@@ -149,10 +152,10 @@ export default {
 				this.mobile = window.sessionStorage.getItem('mobile');
 			}
             var that = this;
-			this.$toast.loading({mask: true,duration:0});
+			//this.$toast.loading({mask: true,duration:0});
             that.$http.post("/chongzhi/index").then(result => {
 				this.isLoading=false;
-				this.$toast.clear();
+				//this.$toast.clear();
                 let res = result.data;
                 if (res.code == 1) {              
 					that.type = res.body.type; 	

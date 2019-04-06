@@ -4,6 +4,9 @@
             <van-icon name="success" />
             <p>支付成功</p>
         </div>
+
+        <van-loading v-show="isLoading" style="margin:auto"/>
+
 		<van-cell title="订单号" :value="info.order_no" />
 		<van-cell title="支付方式" :value="info.pay" />
         <van-cell title="商品" :value="info.goodsName" />
@@ -18,6 +21,7 @@
 export default {
     data() {
         return {
+            isLoading:true,
             info:'',
             order_no:''
         };
@@ -36,10 +40,11 @@ export default {
 		init(){
             var that = this;
             that.order_no = that.$route.params.order_no; 
-            this.$toast.loading({mask: true,duration:0});
+            //this.$toast.loading({mask: true,duration:0});
             let data = {order_no:that.order_no};
             that.$http.post("/chongzhi/info",data).then(result => {
-				this.$toast.clear();
+                //this.$toast.clear();
+                that.isLoading=false;
                 let res = result.data;
                 if (res.code == 1) {              
 					that.info = res.body; 	
