@@ -71,12 +71,12 @@
 
 			<div class="payType">
 				<div class="hd">支付方式</div>
-				<li @click="getPayType(1)">
+				<!-- <li @click="getPayType(1)">
 					<img src="../assets/image/alipay.jpg">
 					<p>支付宝支付</p>
 					<i class="active" v-if="payType==1"></i>
 					<i v-else=""></i>
-				</li>
+				</li> -->
 				<li @click="getPayType(2)">
 					<img src="../assets/image/weixin.jpg">
 					<p>微信支付</p>
@@ -214,6 +214,7 @@ export default {
 			this.payType = value;
 		},
 		doPay(){
+			var that = this;
 			if (this.mobile == "") {
                 this.$toast({message:'请输入手机号码',position:'bottom'});
                 return false;
@@ -228,8 +229,26 @@ export default {
 			}
 			window.sessionStorage.setItem('mobile', this.mobile);
 			this.payShow = false;
-			let url = "app://Recharge?mobile="+this.mobile+"&payType="+this.payType+"&goodsID="+this.goods.id;
-			window.location.href = url;
+			if(this.config.isWeiXin()){
+				let data = {
+					mobile : this.mobile,
+					payType : this.payType,
+					goodsID : this.goods.id,
+				};
+				this.$toast.loading({mask: true,duration:0});
+				that.$http.post("/chongzhi/createOrder",data).then(result => {
+					this.$toast.clear();
+					let res = result.data;
+					if (res.code == 1) {              
+						window.location.href = res.body.url;
+					}else{
+						that.$dialog.alert({title:'错误信息',message:res.desc});
+					}
+				});
+			}else{
+				let url = "app://Recharge?mobile="+this.mobile+"&payType="+this.payType+"&goodsID="+this.goods.id;
+				window.location.href = url;
+			}
 		}
     }
 };
