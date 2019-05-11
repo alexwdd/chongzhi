@@ -1,5 +1,12 @@
 <template>
 	<div class="wrap">
+		<div class="top">
+            <div class="left"><img src="../assets/image/left.png"></div>
+            <div class="right"><div class="btn" @click="openApp">打开APP</div></div>
+        </div>
+
+		<div style="height:46px"></div>
+
 		<van-swipe :autoplay="3000" indicator-color="white">
 			<van-swipe-item v-for="vo in ad" :key="vo.name"><div class="banner"><a :href="vo.url"><img :src="vo.image"/></a></div></van-swipe-item>
 		</van-swipe>
@@ -88,9 +95,41 @@
             <div style="padding: 10px;">
                 <van-button class="my-btn" size="large" @click="doPay">去支付</van-button>
             </div>
-        </van-popup>	
+        </van-popup>
 
 		<van-loading v-show="isLoading" style="margin:auto"/>
+
+		<div style="height:50px"></div>
+		<div class="footer">
+            <div class="logo"><img src="../assets/image/logo.jpg"></div>
+            <div class="info">
+                <p>新加坡同城生活掌上宝</p>
+                <p>
+                    <van-icon name="star" />
+                    <van-icon name="star" />
+                    <van-icon name="star" />
+                    <van-icon name="star" />
+                    <van-icon name="star" />
+                </p>
+            </div>
+            <div class="download" @click="download">下载APP</div>
+        </div>
+
+        <van-popup position="top" v-model="show">
+            <div class="alert">
+                <img src="../assets/image/alert.jpg">
+            </div>
+        </van-popup>
+
+        <van-popup v-model="downShow" class="my-van-popup">
+            <div class="down">
+                <div class="hd"><img src="../assets/image/down.png"></div>
+                <div class="bd">
+                    <li><a :href="config.ANDROIDS"><img src="../assets/image/googleplay.png"></a></li>
+                    <li><a :href="config.IOS"><img src="../assets/image/appstore.png"></a></li>
+                </div>
+            </div>
+        </van-popup>
 	</div>
 </template>
 
@@ -112,7 +151,9 @@ export default {
 			huafei:'',
 			liuliang:'',
 			taocan:'',
-			goods:''
+			goods:'',
+			show:false,
+			downShow:false,
         };
 	},
 	watch:{
@@ -168,6 +209,53 @@ export default {
                 }
             });
 		},
+		openApp(){
+            if(this.config.isWeiXin()){
+                this.show = true
+            }else{
+                var url = '';
+                if(this.config.isIOS()){
+                    url = this.config.IOS;
+                }else{
+                    url = this.config.ANDROIDS
+                }
+                if (this.open_app(this.config.SCHEME)) {
+                    this.open_app(this.config.SCHEME);
+                } else {
+                    var delay = setInterval(function() {
+                        var d = new Date();
+                        var t1 = d.getTime();
+                        var t0 = 0;
+                        if (t1 - t0 < 3000 && t1 - t0 > 2000) {
+                            //alert('检测到未安装，请下载APP');
+                            window.location.href = url
+                        }
+                        if (t1 - t0 >= 3000) {
+                            clearInterval(delay);
+                        }
+                    }, 1000);
+                }
+            }
+		},
+		open_app(src){
+            // 通过iframe的方式试图打开APP，如果能正常打开，会直接切换到APP，并自动阻止a标签的默认行为
+            // 否则打开a标签的href链接
+            var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+            if (userAgent.indexOf("Safari") > -1) {
+                window.location.href = src;
+            } else {
+                var ifr = document.createElement('iframe');
+                ifr.src = src;
+                ifr.style.display = 'none';
+                document.body.appendChild(ifr);
+                window.setTimeout(function() {
+                    document.body.removeChild(ifr);
+                }, 2000);
+            }
+        },
+        download(){
+            this.downShow = true;
+        },
 		showKeyboard(){
 			this.showKey = true;
 		},
@@ -255,6 +343,19 @@ export default {
 </script>
 
 <style scoped>
+.top{clear: both; overflow: hidden; height: 46px; position: fixed; left: 0; width: 100%; z-index: 999; background: #fff; border-bottom: 1px #f1f1f1 solid}
+.top img{display: block; height: 46px;}
+.top .left{float: left;}
+.top .right{float: right;}
+.top .right .btn{float:right; height: 30px; line-height: 30px; background: #7507c2; border-radius: 5px; color: #fff; margin-right: 10px; margin-top: 10px; font-size: 14px; padding: 0 10px}
+.footer{background: rgba(0,0,0,0.8); width:100%; height: 50px; border-radius: 5px; margin: auto; position: fixed; left: 0;bottom: 0px; z-index: 80;}
+.footer .logo{float: left; height: 40px; margin-top: 5px; margin-left: 5px; margin-right: 10px}
+.footer .logo img{height: 40px; display: block;border-radius: 5px}
+.footer .info{float: left; font-size: 14px; color: #fff; padding-top: 5px}
+.footer .info p{line-height: 20px;}
+.footer .info p i{color:#f60 }
+.footer .download{float:right; height: 30px; line-height: 30px; background: #7507c2; border-radius: 5px; color: #fff; margin-right: 10px; margin-top: 10px; font-size: 14px; padding: 0 10px}
+
 .wrap{min-height: 100vh}
 .type{clear: both; overflow: hidden;}
 .type li{float: left; width: 33.333%; padding: 10px; box-sizing: border-box}
@@ -286,4 +387,13 @@ export default {
 .mobile p{flex: 1; margin: 0;line-height:50px; font-size: 20px;}
 .gray{color: #999}
 .empty{text-align: center;color: #999; padding: 30px 0;}
+
+.alert{width: 100%;}
+.alert img{width: 100%}
+.my-van-popup {background-color:transparent; width: 80%;}
+.down{clear: both; overflow: hidden;}
+.down img{display: block}
+.down .hd{clear: both;}
+.down .bd{background: #fff; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; padding: 20px; overflow: hidden; padding-right: 0}
+.down .bd li{float: left; width: 50%; padding-right: 20px; box-sizing: border-box}
 </style>
