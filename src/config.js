@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 const global={
     APP_NAME: '新加坡圈',
     SCHEME:'ausSingapore://startapp',
