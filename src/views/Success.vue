@@ -42,7 +42,7 @@ export default {
             that.order_no = that.$route.params.order_no; 
             //this.$toast.loading({mask: true,duration:0});
             let data = {order_no:that.order_no};
-            that.$http.post("/chongzhi/info",data).then(result => {
+            that.$http.post("V1/chongzhi/info",data).then(result => {
                 //this.$toast.clear();
                 that.isLoading=false;
                 let res = result.data;

@@ -1,7 +1,7 @@
 <template>
 	<div class="wrap">
 		<div class="top" v-show="barShow">
-            <div class="left"><img src="../assets/image/left.png"></div>
+            <div class="left"><a href="http://wx.worldmedia.top/singapore/"><img src="../assets/image/left.png"></a></div>
             <div class="right"><div class="btn" @click="openApp">打开APP</div></div>
         </div>
 
@@ -134,6 +134,7 @@
 </template>
 
 <script>
+import wx from 'weixin-js-sdk';
 export default {
     data() {
         return {
@@ -187,6 +188,10 @@ export default {
 		}
     },
     created(){	
+		var urlArr = location.href.split('?');//url不能写死
+        if(urlArr.length>1){
+            window.location.href = urlArr[0];
+        }
         this.init();
 	},
     methods: {
@@ -198,8 +203,11 @@ export default {
 			if(window.sessionStorage.getItem('mobile')){
 				this.mobile = window.sessionStorage.getItem('mobile');
 			}
+
+			that.share();
+
 			//this.$toast.loading({mask: true,duration:0});
-            that.$http.post("/chongzhi/index").then(result => {
+            that.$http.post("V1/chongzhi/index").then(result => {
 				this.isLoading=false;
 				//this.$toast.clear();
                 let res = result.data;
@@ -291,6 +299,53 @@ export default {
 				}
 			}
 		},
+		share(){
+            var that = this;
+            var url = 'http://chongzhi.worldmedia.top/';
+            that.$http.post("V3/weixin/wxsdk",{ reqUrl: window.location.href }).then(result => {
+                let res = result.data;
+                wx.config({ 
+                    beta: true,
+                    debug: false, //生产环境需要关闭debug模式 
+                    appId: res.appID, //appId通过微信服务号后台查看 
+                    timestamp: res.timestamp, //生成签名的时间戳 
+                    nonceStr: res.noncestr, //生成签名的随机字符串 
+                    signature: res.signature, //签名 
+                    jsApiList: [ //需要调用的JS接口列表 
+                        'onMenuShareTimeline', //分享给好友 
+                        'onMenuShareAppMessage', //分享到朋友圈 
+                    ] 
+                });
+                wx.ready(function () {
+                    //检测js接口
+                    wx.checkJsApi({
+                        jsApiList: [
+                            'onMenuShareTimeline', //检测客户微信版本是否支持该接口
+                            'onMenuShareAppMessage'
+                        ],
+                        success: function (res) {
+                            //alert(JSON.stringify(res));
+                        }
+                    });
+
+                    wx.onMenuShareTimeline({
+                        title: 'SingTel、StarHub、M1话费流量套餐人民币即时充值', // 分享标题
+                        link: url, // 分享链接
+                        imgUrl:'http://chongzhi.worldmedia.top/logo.jpg', // 分享图标
+                    });
+
+                    wx.onMenuShareAppMessage({
+                        title: 'SingTel、StarHub、M1话费流量套餐人民币即时充值', // 分享标题
+                        desc: '新加坡生活圈', // 分享描述
+                        link: url, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                        imgUrl: 'http://chongzhi.worldmedia.top/logo.jpg', // 分享图标
+                        type: '', // 分享类型,music、video或link，不填默认为link
+                        dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+                    });
+                })
+                
+            });
+        },
 		doChongzhi(value){
 			if (this.mobile == "") {
                 this.$toast({message:'请输入手机号码',position:'bottom'});
@@ -323,13 +378,22 @@ export default {
 			window.sessionStorage.setItem('mobile', this.mobile);
 			this.payShow = false;
 			if(this.config.isWeiXin()){
+				let url = "app://Recharge?mobile="+this.mobile+"&payType="+this.payType+"&goodsID="+this.goods.id;
+				window.location.href = url;
+			}else{
+
+			}
+			if(this.config.isApp()){
+				let url = "app://Recharge?mobile="+this.mobile+"&payType="+this.payType+"&goodsID="+this.goods.id;
+				window.location.href = url;				
+			}else{
 				let data = {
 					mobile : this.mobile,
 					payType : this.payType,
 					goodsID : this.goods.id,
 				};
 				this.$toast.loading({mask: true,duration:0});
-				that.$http.post("/chongzhi/createOrder",data).then(result => {
+				that.$http.post("V1/chongzhi/createOrder",data).then(result => {
 					this.$toast.clear();
 					let res = result.data;
 					if (res.code == 1) {              
@@ -338,9 +402,6 @@ export default {
 						that.$dialog.alert({title:'错误信息',message:res.desc});
 					}
 				});
-			}else{
-				let url = "app://Recharge?mobile="+this.mobile+"&payType="+this.payType+"&goodsID="+this.goods.id;
-				window.location.href = url;
 			}
 		}
     }
