@@ -78,12 +78,12 @@
 
 			<div class="payType">
 				<div class="hd">支付方式</div>
-				<!-- <li @click="getPayType(1)">
+				<li @click="getPayType(1)">
 					<img src="../assets/image/alipay.jpg">
 					<p>支付宝支付</p>
 					<i class="active" v-if="payType==1"></i>
 					<i v-else=""></i>
-				</li> -->
+				</li>
 				<li @click="getPayType(2)">
 					<img src="../assets/image/weixin.jpg">
 					<p>微信支付</p>
