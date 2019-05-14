@@ -1,11 +1,11 @@
 <template>
 	<div class="wrap">
-		<div class="top">
+		<div class="top" v-show="barShow">
             <div class="left"><img src="../assets/image/left.png"></div>
             <div class="right"><div class="btn" @click="openApp">打开APP</div></div>
         </div>
 
-		<div style="height:46px"></div>
+		<div style="height:46px" v-show="barShow"></div>
 
 		<van-swipe :autoplay="3000" indicator-color="white">
 			<van-swipe-item v-for="vo in ad" :key="vo.name"><div class="banner"><a :href="vo.url"><img :src="vo.image"/></a></div></van-swipe-item>
@@ -99,8 +99,8 @@
 
 		<van-loading v-show="isLoading" style="margin:auto"/>
 
-		<div style="height:50px"></div>
-		<div class="footer">
+		<div style="height:50px" v-show="barShow"></div>
+		<div class="footer" v-show="barShow">
             <div class="logo"><img src="../assets/image/logo.jpg"></div>
             <div class="info">
                 <p>新加坡同城生活掌上宝</p>
@@ -154,6 +154,8 @@ export default {
 			goods:'',
 			show:false,
 			downShow:false,
+
+			barShow:true,
         };
 	},
 	watch:{
@@ -188,11 +190,14 @@ export default {
         this.init();
 	},
     methods: {
-		init(){
+		init(){			
+			var that = this;
+			if(this.config.isApp()){
+                that.barShow = false;
+			}			
 			if(window.sessionStorage.getItem('mobile')){
 				this.mobile = window.sessionStorage.getItem('mobile');
 			}
-            var that = this;
 			//this.$toast.loading({mask: true,duration:0});
             that.$http.post("/chongzhi/index").then(result => {
 				this.isLoading=false;
