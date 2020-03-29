@@ -10,7 +10,7 @@
 		<van-swipe :autoplay="3000" indicator-color="white">
 			<van-swipe-item v-for="vo in ad" :key="vo.name"><div class="banner" @click="onClickAd(vo)"><img :src="vo.image"/></div></van-swipe-item>
 		</van-swipe>
-
+		<van-notice-bar :scrollable="false">请选择手机号供应商</van-notice-bar>
 		<div class="type">
 			<li @click="handleType(vo)" v-for="vo in type" :key="vo.id"><img :src="vo.aimg" v-if="vo.active"><img :src="vo.img" v-else=""></li>
 		</div>
